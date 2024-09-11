@@ -1,0 +1,446 @@
+basePath: /
+definitions:
+  gin.H:
+    additionalProperties: {}
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      role:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+  movieModels.Movie:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      genre:
+        type: string
+      id:
+        type: integer
+      poster:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+      year:
+        type: integer
+    type: object
+  movieModels.Schedules:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      movie_id:
+        type: integer
+      time:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  seatsModel.Seats:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      movie_id:
+        type: integer
+      reserved:
+        type: boolean
+      seat_number:
+        type: string
+      time:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API for movie reservation
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Movie Reservation
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Responds with the token in a cookie
+      parameters:
+      - description: User credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user logged in
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: "invalid password\"\t\"user does not exist"
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not generate token
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Login user
+      tags:
+      - auth
+  /logout:
+    get:
+      description: Responds with the success message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user logged out
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Logout user
+      tags:
+      - auth
+  /movies:
+    delete:
+      consumes:
+      - application/json
+      description: Responds with the success message
+      parameters:
+      - description: Movie info
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/movieModels.Movie'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: movie deleted
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not delete movie
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete movie
+      tags:
+      - movies
+    post:
+      consumes:
+      - application/json
+      description: Responds with the movie ID
+      parameters:
+      - description: Movie info
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/movieModels.Movie'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: movie added
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not add movie
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Add movie
+      tags:
+      - movies
+    put:
+      consumes:
+      - application/json
+      description: Responds with the success message
+      parameters:
+      - description: Movie info
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/movieModels.Movie'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: movie updated
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not update movie
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Update movie
+      tags:
+      - movies
+  /movies/schedules:
+    delete:
+      consumes:
+      - application/json
+      description: Responds with the success message
+      parameters:
+      - description: Movie ID
+        in: body
+        name: movie_id
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: schedules deleted
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not delete schedules
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete schedules for a movie
+      tags:
+      - movies
+    get:
+      consumes:
+      - application/json
+      description: Responds with the schedules info
+      parameters:
+      - description: Movie ID
+        in: body
+        name: movie_id
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: schedules
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not show schedules
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Show schedules for a movie
+      tags:
+      - movies
+    put:
+      consumes:
+      - application/json
+      description: Responds with the success message
+      parameters:
+      - description: Schedules info
+        in: body
+        name: schedules
+        required: true
+        schema:
+          $ref: '#/definitions/movieModels.Schedules'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: schedules set
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not set schedules
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Set schedules for a movie
+      tags:
+      - movies
+  /seats:
+    delete:
+      consumes:
+      - application/json
+      description: Responds with the success message
+      parameters:
+      - description: Seat info
+        in: body
+        name: seat
+        required: true
+        schema:
+          $ref: '#/definitions/seatsModel.Seats'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: seat unreserved
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not unreserve seat
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Unreserve a seat
+      tags:
+      - seats
+    post:
+      consumes:
+      - application/json
+      description: Responds with the reserved seat
+      parameters:
+      - description: Seat info
+        in: body
+        name: seat
+        required: true
+        schema:
+          $ref: '#/definitions/seatsModel.Seats'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: seat reserved
+          schema:
+            $ref: '#/definitions/seatsModel.Seats'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not reserve seat
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Reserve a seat
+      tags:
+      - seats
+  /seats/reserved:
+    get:
+      consumes:
+      - application/json
+      description: Responds with the reserved seats info
+      parameters:
+      - description: Seat info
+        in: body
+        name: seat
+        required: true
+        schema:
+          $ref: '#/definitions/seatsModel.Seats'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: reserved seats
+          schema:
+            $ref: '#/definitions/seatsModel.Seats'
+        "400":
+          description: invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not show reserved seats
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Show reserved seats for a movie
+      tags:
+      - seats
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Responds with the success message
+      parameters:
+      - description: User credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user created
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: user already exists
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: could not generate password hash
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Signup user
+      tags:
+      - auth
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
